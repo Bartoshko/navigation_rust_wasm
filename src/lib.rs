@@ -47,7 +47,7 @@ mod navigation_service {
         coords: Vec<Point>,
         costs: crate::HashMap<i32, i32>,
         parents: crate::HashMap<i32, i32>,
-        dijkstraVertexMatrix: Vec<Vertex>,
+        dijkstra_vertex_matrix: Vec<Vertex>,
         start_point_index: i32,
         end_poiint_index: i32,
         processed: Vec<i32>,
@@ -57,12 +57,12 @@ mod navigation_service {
         pub fn is_same_length(x_vec: &Vec<i32>, y_vec: &Vec<i32>) -> bool {
             x_vec.len() == y_vec.len()
         }
-        pub fn new(&self, coords_x: Vec<i32>, coords_y: Vec<i32>) -> Result<&'static str, &'static str> {
+        pub fn new(coords_x: Vec<i32>, coords_y: Vec<i32>) -> Result<&'static str, &'static str> {
             if !Dijkstra::is_same_length(&coords_x, &coords_y) {
                 return Err("Coordinates do not match, lists are having unequal length");
             }
-            let mut coords: Vec<i32>;
-            for (x, y) in izip!(&coords_x, &coords_y) {
+            let mut coords: Vec<Point> = vec![];
+            for (x, y) in izip!(coords_x, coords_y) {
                 coords.push(Point {x, y});
             }
             Ok("ok")
