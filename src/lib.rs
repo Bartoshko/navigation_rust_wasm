@@ -7,7 +7,7 @@ mod utils;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
-use std::collections::HashMap;
+// use std::collections::HashMap;
 
 cfg_if! {
     // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -25,47 +25,56 @@ extern "C" {
     fn log(s: &str);
 }
 
+struct Point {
+    x: i32,
+    y: i32
+}
+struct Line {
+    start: Point,
+    finish: Point,
+}
+
 #[wasm_bindgen(js_namespace = console)]
 pub fn navigate(x_es: Vec<i32>, y_es: Vec<i32>) -> (Vec<i32>, Vec<i32>) {
     (x_es, y_es)
 }
 
 mod navigation_service {
-    struct Point {
-        x: i32,
-        y: i32
-    }
     struct GraphRelation {
         vertex_index: i32,
         cost: i32,
     }
     struct Vertex {
-        coordinates: Point,
+        coordinates: super::Point,
         grpahs: Vec<GraphRelation>,
     }
     pub struct Dijkstra {
-        coords: Vec<Point>,
-        costs: crate::HashMap<i32, i32>,
-        parents: crate::HashMap<i32, i32>,
-        dijkstra_vertex_matrix: Vec<Vertex>,
-        start_point_index: i32,
-        end_poiint_index: i32,
-        processed: Vec<i32>,
-        cheapest_vertex_index: i32,
+        lines: Vec<super::Line>,
     }
     impl Dijkstra {
-        pub fn is_same_length(x_vec: &Vec<i32>, y_vec: &Vec<i32>) -> bool {
+        pub fn is_same_length(x_vec: &Vec<super::Point>, y_vec: &Vec<super::Point>) -> bool {
             x_vec.len() == y_vec.len()
         }
-        pub fn new(coords_x: Vec<i32>, coords_y: Vec<i32>) -> Result<&'static str, &'static str> {
-            if !Dijkstra::is_same_length(&coords_x, &coords_y) {
+        pub fn new(starting_points: Vec<super::Point>, ending_points: Vec<super::Point>) -> Result<Dijkstra, &'static str> {
+            if !Dijkstra::is_same_length(&starting_points, &ending_points) {
                 return Err("Coordinates do not match, lists are having unequal length");
             }
-            let mut coords: Vec<Point> = vec![];
-            for (x, y) in izip!(coords_x, coords_y) {
-                coords.push(Point {x, y});
+            let coords: Vec<super::Line> = vec![];
+            for (start, finish) in izip!(starting_points, ending_points) {
+                coords.push(super::Line {start, finish});
             }
-            Ok("ok")
+            Ok(Dijkstra{lines: coords})
+        }
+        pub fn calculate_shortest_path(&self, start_point: super::Point, end_point: super::Point) -> Vec<super::Line> {
+            //let mut costs: crate::HashMap<i32, i32>,
+            //let mut parents: crate::HashMap<i32, i32>,
+            //let mut dijkstra_vertex_matrix: Vec<Vertex>,
+            //let mut start_point_index: i32,
+            //let mut end_poiint_index: i32,
+            //let mut processed: Vec<i32>,
+            //let mut cheapest_vertex_index: i32,
+            let result_path = self.lines.clone();
+            result_path
         }
     }
 }
