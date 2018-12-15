@@ -1,5 +1,5 @@
 [package]
-name = "navigaton-rust-wasm"
+name = "navigation-rust-wasm"
 version = "0.1.0"
 authors = ["Bartoshko <lenart.consulting@gmail.com>"]
 
@@ -12,6 +12,7 @@ default = ["console_error_panic_hook"]
 [dependencies]
 cfg-if = "0.1.2"
 wasm-bindgen = "0.2"
+itertools = "0.7"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
