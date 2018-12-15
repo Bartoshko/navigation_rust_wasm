@@ -34,9 +34,10 @@ pub struct Line {
     finish: Point,
 }
 
+#[wasm_bindgen()]
 pub fn navigate(x_es_start: Vec<i32>, y_es_start: Vec<i32>,
-    x_es_finish: Vec<i32>, y_es_finish: Vec<i32>, starting_position: [i32; 2], targeted_position: [i32; 2]) -> 
-    (Vec<i32>, Vec<i32>, Vec<i32>, Vec<i32>) {
+    x_es_finish: Vec<i32>, y_es_finish: Vec<i32>,
+    starting_position: Vec<i32>, targeted_position: Vec<i32>) -> bool {
     let dijkstra_result: Result<navigation_service::Dijkstra, &str> = navigation_service::Dijkstra::new(
         x_es_start, y_es_start, x_es_finish, y_es_finish
     );
@@ -49,7 +50,7 @@ pub fn navigate(x_es_start: Vec<i32>, y_es_start: Vec<i32>,
         let r1: Vec<i32> = vec![0];
         let r2: Vec<i32> = vec![0];
         let r3: Vec<i32> = vec![0];
-        return (r0, r1, r2, r3);
+        return false;
     }
     dijkstra = dijkstra_result.unwrap();
     dijkstra.calculate_shortest_path(point_to_start_from, point_to_calc_path_to)
@@ -83,8 +84,7 @@ mod navigation_service {
             }
             Ok(Dijkstra{lines: coords})
         }
-        pub fn calculate_shortest_path(&self, starting_position: crate::Point, final_destination: crate::Point) -> 
-        (Vec<i32>, Vec<i32>, Vec<i32>, Vec<i32>) {
+        pub fn calculate_shortest_path(&self, starting_position: crate::Point, final_destination: crate::Point) -> bool {
             //let mut costs: crate::HashMap<i32, i32>,
             //let mut parents: crate::HashMap<i32, i32>,
             //let mut dijkstra_vertex_matrix: Vec<Vertex>,
@@ -92,17 +92,7 @@ mod navigation_service {
             //let mut end_poiint_index: i32,
             //let mut processed: Vec<i32>,
             //let mut cheapest_vertex_index: i32,
-            self.destruct_lines_to_tuple()
-        }
-        fn destruct_lines_to_tuple(&self) -> (Vec<i32>, Vec<i32>, Vec<i32>, Vec<i32>) {
-            let mut destruct_result: (Vec<i32>, Vec<i32>, Vec<i32>, Vec<i32>) = (vec![], vec![], vec![], vec![]);
-            for item in self.lines.iter() {
-                destruct_result.0.push(item.start.x);
-                destruct_result.1.push(item.start.y);
-                destruct_result.2.push(item.finish.x);
-                destruct_result.3.push(item.finish.y);
-            }
-            destruct_result
+            true
         }
     }
 }
