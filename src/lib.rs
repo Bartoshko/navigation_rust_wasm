@@ -37,7 +37,7 @@ pub struct Line {
 #[wasm_bindgen()]
 pub fn navigate(x_es_start: Vec<i32>, y_es_start: Vec<i32>,
     x_es_finish: Vec<i32>, y_es_finish: Vec<i32>,
-    starting_position: Vec<i32>, targeted_position: Vec<i32>) -> bool {
+    starting_position: Vec<i32>, targeted_position: Vec<i32>) -> Vec<i32> {
     let dijkstra_result: Result<navigation_service::Dijkstra, &str> = navigation_service::Dijkstra::new(
         x_es_start, y_es_start, x_es_finish, y_es_finish
     );
@@ -46,11 +46,7 @@ pub fn navigate(x_es_start: Vec<i32>, y_es_start: Vec<i32>,
     let dijkstra: navigation_service::Dijkstra;
     if dijkstra_result.is_err() {
         println!("{:?}", dijkstra_result.is_err());
-        let r0: Vec<i32> = vec![0];
-        let r1: Vec<i32> = vec![0];
-        let r2: Vec<i32> = vec![0];
-        let r3: Vec<i32> = vec![0];
-        return false;
+        return vec![starting_position[0], starting_position[1]]
     }
     dijkstra = dijkstra_result.unwrap();
     dijkstra.calculate_shortest_path(point_to_start_from, point_to_calc_path_to)
@@ -84,7 +80,7 @@ mod navigation_service {
             }
             Ok(Dijkstra{lines: coords})
         }
-        pub fn calculate_shortest_path(&self, starting_position: crate::Point, final_destination: crate::Point) -> bool {
+        pub fn calculate_shortest_path(&self, starting_position: crate::Point, final_destination: crate::Point) -> Vec<i32> {
             //let mut costs: crate::HashMap<i32, i32>,
             //let mut parents: crate::HashMap<i32, i32>,
             //let mut dijkstra_vertex_matrix: Vec<Vertex>,
@@ -92,7 +88,23 @@ mod navigation_service {
             //let mut end_poiint_index: i32,
             //let mut processed: Vec<i32>,
             //let mut cheapest_vertex_index: i32,
-            true
+            self.path_to_vector()
+        }
+        pub fn path_to_vector(&self) -> Vec<i32> {
+            //TODO: for now this will return lines but in future this will return calculate shortest path
+            let mut path_vectorized: Vec<i32> = vec![];
+            for _line in &self.lines {
+                let coord_x_s: i32 = _line.start.x;
+                let coord_y_s: i32 = _line.start.y;
+                let coord_x_f: i32 = _line.finish.x;
+                let coord_y_f: i32 = _line.finish.y;
+                path_vectorized.push(coord_x_s);
+                path_vectorized.push(coord_y_s);
+                path_vectorized.push(coord_x_f);
+                path_vectorized.push(coord_y_f);
+
+            }
+            path_vectorized
         }
     }
 }
