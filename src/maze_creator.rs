@@ -1,5 +1,4 @@
-// This module is to generate maze like structure that is in int32Array format to be used in JS.
-// Knowing the shortest path it will test Dijkstra algorithm that is goimg to be used in Web Assembly
+// This module is testing correctness and speed of Dijkstra Algorithm.
 use navigation_service;
 extern crate rand;
 use maze_creator::rand::{thread_rng, Rng};
@@ -48,7 +47,7 @@ impl LineMaze {
             let penultimate_point: navigation_service::Point = self.create_branch(&loc_steps_num);
             self.lines.push(navigation_service::Line {
                 start: penultimate_point.copy(),
-                finish: self.finish_point.copy()
+                finish: self.finish_point.copy(),
             });
         }
     }
@@ -69,7 +68,7 @@ impl LineMaze {
             }
             self.lines.push(navigation_service::Line {
                 start: a_point.copy(),
-                finish: b_point.copy()
+                finish: b_point.copy(),
             });
         }
         b_point
@@ -92,13 +91,16 @@ mod test_maze {
     }
     #[test]
     fn generate_maze_and_check_shortest_path() {
-        let mut maze: super::LineMaze = super::LineMaze::new(10, 20);
+        let mut maze: super::LineMaze = super::LineMaze::new(100, 200);
         maze.create();
         let shortest_path: &Vec<super::navigation_service::Line> = &maze.shortest_path;
         let paths: &Vec<super::navigation_service::Line> = &maze.lines;
         let paths_1: &Vec<super::navigation_service::Line> = &maze.lines;
-        assert_eq!(shortest_path.len(), 10);
-        assert!(paths.len() > shortest_path.len());
+        // test shortest path length
+        assert_eq!(shortest_path.len(), 100);
+        // test all paths are having greater num than shortest path num
+        assert!(paths.len() / (200 - 1) > shortest_path.len());
+        // test shortest path is borrowed as referance
         assert!(paths_1.len() == paths.len());
     }
 }

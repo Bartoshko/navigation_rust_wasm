@@ -45,10 +45,12 @@ struct GraphRelation {
     vertex_index: i32,
     cost: i32,
 }
+
 struct Vertex {
     coordinates: Point,
     grpahs: Vec<GraphRelation>,
 }
+
 pub struct Dijkstra {
     lines: Vec<Line>,
     costs: HashMap<i32, i32>,
@@ -60,38 +62,7 @@ pub struct Dijkstra {
     cheapest_vertex_index: i32,
 }
 impl Dijkstra {
-    pub fn is_same_length(maze_mess: &Vec<i32>) -> bool {
-        maze_mess.len() % 4 == 0
-    }
-    pub fn set_maze_mess_to_lines_order(maze_mess: Vec<i32>) -> Vec<Line> {
-        let mut lines_ordered: Vec<Line> = Vec::new();
-        let mut counter: i32 = 0;
-        let mut x_s: i32 = 0;
-        let mut y_s: i32 = 0;
-        let mut x_f: i32 = 0;
-        for item in &maze_mess {
-            counter += 1;
-            match counter {
-                1 => x_s = *item,
-                2 => y_s = *item,
-                3 => x_f = *item,
-                4 => {
-                    counter = 0;
-                    lines_ordered.push(Line {
-                        start: Point { x: x_s, y: y_s },
-                        finish: Point { x: x_f, y: *item },
-                    });
-                }
-                _ => (),
-            }
-        }
-        lines_ordered
-    }
-    pub fn new(maze_v: Vec<i32>) -> Result<Dijkstra, &'static str> {
-        if !Dijkstra::is_same_length(&maze_v) {
-            return Err("Coordinates do not match, lists are having unequal length");
-        }
-        let maze_lines: Vec<Line> = Dijkstra::set_maze_mess_to_lines_order(maze_v);
+    pub fn new(maze_lines: Vec<Line>) -> Result<Dijkstra, &'static str> {
         Ok(Dijkstra {
             lines: maze_lines,
             costs: HashMap::new(),
@@ -107,18 +78,48 @@ impl Dijkstra {
         &self,
         starting_position: Point,
         final_destination: Point,
-    ) -> Vec<i32> {
-        self.path_to_vector()
+    ) -> Vec<Line> {
+        let result: Vec<Line> = Vec::new();
+        result
     }
-    fn path_to_vector(&self) -> Vec<i32> {
-        //TODO: for now this will return lines but in future this will return calculate shortest path
-        let mut path_vectorized: Vec<i32> = Vec::new();
-        for _line in &self.lines {
-            path_vectorized.push(_line.start.x);
-            path_vectorized.push(_line.start.y);
-            path_vectorized.push(_line.finish.x);
-            path_vectorized.push(_line.finish.y);
+}
+
+pub fn path_to_vector(lines: &Vec<Line>) -> Vec<i32> {
+    let mut path_vectorized: Vec<i32> = Vec::new();
+    for _line in lines {
+        path_vectorized.push(_line.start.x);
+        path_vectorized.push(_line.start.y);
+        path_vectorized.push(_line.finish.x);
+        path_vectorized.push(_line.finish.y);
+    }
+    path_vectorized
+}
+
+pub fn vector_to_path(maze_mess: Vec<i32>) -> Vec<Line> {
+    let mut lines_ordered: Vec<Line> = Vec::new();
+    let mut counter: i32 = 0;
+    let mut x_s: i32 = 0;
+    let mut y_s: i32 = 0;
+    let mut x_f: i32 = 0;
+    for item in &maze_mess {
+        counter += 1;
+        match counter {
+            1 => x_s = *item,
+            2 => y_s = *item,
+            3 => x_f = *item,
+            4 => {
+                counter = 0;
+                lines_ordered.push(Line {
+                    start: Point { x: x_s, y: y_s },
+                    finish: Point { x: x_f, y: *item },
+                });
+            }
+            _ => (),
         }
-        path_vectorized
     }
+    lines_ordered
+}
+
+pub fn is_same_length(maze_mess: &Vec<i32>) -> bool {
+    maze_mess.len() % 4 == 0
 }
