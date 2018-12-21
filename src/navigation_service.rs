@@ -4,10 +4,36 @@ pub struct Point {
     pub x: i32,
     pub y: i32,
 }
+impl Point {
+    pub fn copy(&self) -> Point {
+        let mut point_copy = Point {
+            x: self.x,
+            y: self.y
+        };
+        point_copy
+    }
+}
+
 pub struct Line {
     pub start: Point,
     pub finish: Point,
 }
+impl Line {
+    pub fn copy(&self) -> Line {
+        let line_copy = Line {
+            start: Point {
+                x: self.start.x,
+                y: self.start.y
+            },
+            finish: Point {
+                x: self.finish.x,
+                y: self.finish.y
+            }
+        };
+        line_copy
+    }
+}
+
 struct GraphRelation {
     vertex_index: i32,
     cost: i32,
