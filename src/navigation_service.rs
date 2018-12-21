@@ -63,6 +63,9 @@ pub struct Dijkstra {
 }
 impl Dijkstra {
     pub fn new(maze_lines: Vec<Line>) -> Result<Dijkstra, &'static str> {
+        if !is_correct_line_set(&maze_lines) {
+            return Err("Wrong lines format.");
+        }
         Ok(Dijkstra {
             lines: maze_lines,
             costs: HashMap::new(),
@@ -75,12 +78,28 @@ impl Dijkstra {
         })
     }
     pub fn calculate_shortest_path(
-        &self,
+        &mut self,
         starting_position: Point,
         final_destination: Point,
     ) -> Vec<Line> {
-        let result: Vec<Line> = Vec::new();
+        let mut result: Vec<Line> = Vec::new();
+        if is_same_point(&starting_position, &final_destination) {
+            result.push(Line {
+                start: starting_position.copy(),
+                finish: starting_position.copy(),
+            });
+            return result;
+        }
+        self.create_vertex_matrix();
         result
+    }
+    fn create_vertex_matrix(&mut self) {
+        for _l in &self.lines {
+            self.append_to_vertex_matrix(&_l);
+        }
+    }
+    fn append_to_vertex_matrix(&self, line: &Line) {
+        
     }
 }
 
@@ -120,6 +139,25 @@ pub fn vector_to_path(maze_mess: Vec<i32>) -> Vec<Line> {
     lines_ordered
 }
 
-pub fn is_same_length(maze_mess: &Vec<i32>) -> bool {
+pub fn is_correct_length(maze_mess: &Vec<i32>) -> bool {
     maze_mess.len() % 4 == 0
+}
+
+pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
+    if lines.len() == 0 {
+        return false;
+    }
+    for line in lines {
+        if line.start.x == line.finish.x && line.start.y == line.finish.y {
+            return false;
+        }
+    }
+    true
+}
+
+pub fn is_same_point(p_1: &Point, p_2: &Point) -> bool {
+    if p_1.x == p_2.x && p_1.y == p_2.y {
+        return true;
+    }
+    false
 }

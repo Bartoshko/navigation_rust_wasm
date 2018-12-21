@@ -38,7 +38,7 @@ pub fn navigate(
     starting_position: Vec<i32>,
     targeted_position: Vec<i32>,
 ) -> Vec<i32> {
-    if navigation_service::is_same_length(&given_maze) {
+    if navigation_service::is_correct_length(&given_maze) {
         return vec![starting_position[0], starting_position[1]];
     }
     let maze_lines: Vec<navigation_service::Line> = navigation_service::vector_to_path(given_maze);
