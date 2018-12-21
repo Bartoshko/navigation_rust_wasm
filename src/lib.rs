@@ -25,9 +25,11 @@ extern "C" {
 }
 
 #[wasm_bindgen()]
-pub fn create_maze(path_lines_num: i32, branches_num: i32) -> Vec<i32> {
-    let line_maze: maze_creator::LineMaze = maze_creator::LineMaze::new(path_lines_num, branches_num);
-    line_maze.create()
+pub fn create_maze(path_lines_num: u32, branches_num: u32) -> Vec<i32> {
+    let mock_empty_vec: Vec<i32> = vec![1,];
+    // let mut line_maze: maze_creator::LineMaze = maze_creator::LineMaze::new(path_lines_num, branches_num);
+    // let v: &Vec<navigation_service::Line> = line_maze.create():
+    mock_empty_vec
 }
 
 #[wasm_bindgen()]
