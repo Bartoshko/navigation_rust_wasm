@@ -41,74 +41,35 @@ impl LineMaze {
         let loc_lines_num = self.lines_num;
         self.finish_point = self.create_branch(&loc_lines_num);
         for line in &self.lines {
-            self.shortest_path.push(navigation_service::Line {
-                start: navigation_service::Point {
-                    x: line.start.x,
-                    y: line.start.y
-                },
-                finish: navigation_service::Point {
-                    x: line.finish.x,
-                    y: line.finish.y
-                }
-            });
+            self.shortest_path.push(line.copy());
         }
         for _ in 0..self.branches_num {
             let loc_steps_num: u32 = self.lines_num;
             let penultimate_point: navigation_service::Point = self.create_branch(&loc_steps_num);
             self.lines.push(navigation_service::Line {
-                start: navigation_service::Point {
-                    x: penultimate_point.x,
-                    y: penultimate_point.y,
-                },
-                finish: navigation_service::Point {
-                    x: self.finish_point.x,
-                    y: self.finish_point.y
-                }
+                start: penultimate_point.copy(),
+                finish: self.finish_point.copy()
             });
         }
     }
-    fn create_branch(
-        &mut self,
-        steps_num_iter: &u32
-    ) -> navigation_service::Point {
+    fn create_branch(&mut self, steps_num_iter: &u32) -> navigation_service::Point {
         let local_vector: navigation_service::Point =
             LineMaze::generate_random_vector_in_range(-10, 10);
         let mut a_point: navigation_service::Point;
-        let mut b_point: navigation_service::Point = navigation_service::Point {
-            x: self.start_point.x + local_vector.x,
-            y: self.start_point.y + local_vector.y,
-        };
+        let mut b_point: navigation_service::Point = self.start_point.add(&local_vector);
         for n in 0..*steps_num_iter {
             let deviation_vector: navigation_service::Point =
                 LineMaze::generate_random_vector_in_range(-2, 2);
             if n == 0 {
-                a_point = navigation_service::Point {
-                    x: self.start_point.x,
-                    y: self.start_point.y,
-                };
-                b_point = navigation_service::Point {
-                    x: a_point.x + local_vector.x + deviation_vector.x,
-                    y: a_point.y + local_vector.y + deviation_vector.y,
-                };
+                a_point = self.start_point.copy();
+                b_point = a_point.add(&local_vector).add(&deviation_vector);
             } else {
-                a_point = navigation_service::Point {
-                    x: b_point.x,
-                    y: b_point.y,
-                };
-                b_point = navigation_service::Point {
-                    x: a_point.x + local_vector.x + deviation_vector.x,
-                    y: a_point.y + local_vector.y + deviation_vector.y,
-                };
+                a_point = b_point.copy();
+                b_point = a_point.add(&local_vector).add(&deviation_vector);
             }
             self.lines.push(navigation_service::Line {
-                start: navigation_service::Point {
-                    x: a_point.x,
-                    y: a_point.y,
-                },
-                finish: navigation_service::Point {
-                    x: b_point.x,
-                    y: b_point.y,
-                },
+                start: a_point.copy(),
+                finish: b_point.copy()
             });
         }
         b_point

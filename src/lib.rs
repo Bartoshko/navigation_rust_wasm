@@ -1,9 +1,9 @@
 extern crate cfg_if;
 extern crate wasm_bindgen;
 
-mod utils;
-mod navigation_service;
 mod maze_creator;
+mod navigation_service;
+mod utils;
 
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
@@ -26,20 +26,31 @@ extern "C" {
 
 #[wasm_bindgen()]
 pub fn create_maze(path_lines_num: u32, branches_num: u32) -> Vec<i32> {
-    let mock_empty_vec: Vec<i32> = vec![1,];
+    let mock_empty_vec: Vec<i32> = vec![1];
     // let mut line_maze: maze_creator::LineMaze = maze_creator::LineMaze::new(path_lines_num, branches_num);
     // let v: &Vec<navigation_service::Line> = line_maze.create():
     mock_empty_vec
 }
 
 #[wasm_bindgen()]
-pub fn navigate(given_maze: Vec<i32>, starting_position: Vec<i32>, targeted_position: Vec<i32>) -> Vec<i32> {
-    let new_dijkstra_result: Result<navigation_service::Dijkstra, &str> = navigation_service::Dijkstra::new(given_maze);
-    let point_to_start_from = navigation_service::Point {x :starting_position[0], y: starting_position[1]};
-    let point_to_calc_path_to = navigation_service::Point {x :targeted_position[0], y: targeted_position[1]};
+pub fn navigate(
+    given_maze: Vec<i32>,
+    starting_position: Vec<i32>,
+    targeted_position: Vec<i32>,
+) -> Vec<i32> {
+    let new_dijkstra_result: Result<navigation_service::Dijkstra, &str> =
+        navigation_service::Dijkstra::new(given_maze);
+    let point_to_start_from = navigation_service::Point {
+        x: starting_position[0],
+        y: starting_position[1],
+    };
+    let point_to_calc_path_to = navigation_service::Point {
+        x: targeted_position[0],
+        y: targeted_position[1],
+    };
     let dijkstra: navigation_service::Dijkstra;
     if new_dijkstra_result.is_err() {
-        return vec![starting_position[0], starting_position[1]]
+        return vec![starting_position[0], starting_position[1]];
     }
     dijkstra = new_dijkstra_result.unwrap();
     dijkstra.calculate_shortest_path(point_to_start_from, point_to_calc_path_to)

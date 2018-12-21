@@ -6,9 +6,16 @@ pub struct Point {
 }
 impl Point {
     pub fn copy(&self) -> Point {
-        let mut point_copy = Point {
+        let point_copy = Point {
             x: self.x,
-            y: self.y
+            y: self.y,
+        };
+        point_copy
+    }
+    pub fn add(&self, other: &Point) -> Point {
+        let point_copy = Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
         };
         point_copy
     }
@@ -23,12 +30,12 @@ impl Line {
         let line_copy = Line {
             start: Point {
                 x: self.start.x,
-                y: self.start.y
+                y: self.start.y,
             },
             finish: Point {
                 x: self.finish.x,
-                y: self.finish.y
-            }
+                y: self.finish.y,
+            },
         };
         line_copy
     }
@@ -70,10 +77,11 @@ impl Dijkstra {
                 3 => x_f = *item,
                 4 => {
                     counter = 0;
-                    lines_ordered.push(
-                        Line {start: Point {x: x_s, y: y_s}, finish: Point {x: x_f, y: *item}}
-                    );
-                },
+                    lines_ordered.push(Line {
+                        start: Point { x: x_s, y: y_s },
+                        finish: Point { x: x_f, y: *item },
+                    });
+                }
                 _ => (),
             }
         }
@@ -83,8 +91,8 @@ impl Dijkstra {
         if !Dijkstra::is_same_length(&maze_v) {
             return Err("Coordinates do not match, lists are having unequal length");
         }
-        let maze_lines: Vec<Line> =  Dijkstra::set_maze_mess_to_lines_order(maze_v);
-        Ok(Dijkstra{
+        let maze_lines: Vec<Line> = Dijkstra::set_maze_mess_to_lines_order(maze_v);
+        Ok(Dijkstra {
             lines: maze_lines,
             costs: HashMap::new(),
             parents: HashMap::new(),
@@ -92,25 +100,24 @@ impl Dijkstra {
             start_point_index: 0, //TODO from method to find index of start point and end point
             end_point_index: 0,
             processed: Vec::new(),
-            cheapest_vertex_index: 0 // TODO is the same as start point index
+            cheapest_vertex_index: 0, // TODO is the same as start point index
         })
     }
-    pub fn calculate_shortest_path(&self, starting_position: Point, final_destination: Point) -> Vec<i32> {
+    pub fn calculate_shortest_path(
+        &self,
+        starting_position: Point,
+        final_destination: Point,
+    ) -> Vec<i32> {
         self.path_to_vector()
     }
     fn path_to_vector(&self) -> Vec<i32> {
         //TODO: for now this will return lines but in future this will return calculate shortest path
         let mut path_vectorized: Vec<i32> = Vec::new();
         for _line in &self.lines {
-            let coord_x_s: i32 = _line.start.x;
-            let coord_y_s: i32 = _line.start.y;
-            let coord_x_f: i32 = _line.finish.x;
-            let coord_y_f: i32 = _line.finish.y;
-            path_vectorized.push(coord_x_s);
-            path_vectorized.push(coord_y_s);
-            path_vectorized.push(coord_x_f);
-            path_vectorized.push(coord_y_f);
-
+            path_vectorized.push(_line.start.x);
+            path_vectorized.push(_line.start.y);
+            path_vectorized.push(_line.finish.x);
+            path_vectorized.push(_line.finish.y);
         }
         path_vectorized
     }
