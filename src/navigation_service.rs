@@ -40,11 +40,17 @@ impl Line {
         };
         line_copy
     }
+
+    pub fn length(&self) -> f32 {
+        let distance_x: f32 = (self.start.x - self.finish.x) as f32;
+        let distance_y: f32 = (self.start.y - self.finish.y) as f32;
+        (distance_x.powi(2) + distance_y.powi(2)).sqrt()
+    }
 }
 
 struct GraphRelation {
     vertex_index: i32,
-    cost: i32,
+    cost: f32,
 }
 
 struct Vertex {
@@ -98,6 +104,9 @@ impl Dijkstra {
             return result;
         }
         self.create_vertex_matrix();
+        // TODO: set start point i, end point i,
+        // beggining cost hashmap key, processed vector, parents hash map
+        // cheapest vertex index = start point index for beggining
         result
     }
 
@@ -110,7 +119,6 @@ impl Dijkstra {
     }
 
     fn append_to_vertex_matrix(&mut self, line: Line) {
-        // ToDo: implement adding line to vertex matrixs
         let start_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
             .iter().position(|r| r.is_equal(&line.start));
         let end_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
@@ -119,10 +127,13 @@ impl Dijkstra {
             Some(v) => v as i32,
             None => self.add_new_vertex(line.start.copy()),
         };
-        let end_vertex_index_option: i32 = match end_vertex_index_option {
+        let end_vertex_index: i32 = match end_vertex_index_option {
             Some(v) => v as i32,
             None => self.add_new_vertex(line.finish.copy()),
         };
+        let cost: f32 = line.length();
+        &mut self.update_vertex_matrix(&start_vertex_index, &end_vertex_index, &cost);
+        &mut self.update_vertex_matrix(&end_vertex_index, &start_vertex_index, &cost);
     }
 
     fn add_new_vertex(&mut self, coordinates: Point) -> i32 {
@@ -131,6 +142,22 @@ impl Dijkstra {
             grpahs: Vec::new(),
         });
         self.dijkstra_vertex_matrix.len() as i32
+    }
+
+    fn update_vertex_matrix(&mut self, index_to_update: &i32, index_releted: &i32, cost: &f32) {
+        let i_update: i32 = *index_to_update;
+        let i_related: i32 = *index_releted;
+        let loc_cost: f32 = *cost;
+        if let Some(_) = self.dijkstra_vertex_matrix[i_update as usize]
+            .grpahs.iter().position(|rel| rel.vertex_index == i_related) {
+            return;
+        } else {
+            &self.dijkstra_vertex_matrix[i_update as usize]
+            .grpahs.push(GraphRelation {
+                vertex_index: i_related,
+                cost: loc_cost
+            });
+        }
     }
 }
 
