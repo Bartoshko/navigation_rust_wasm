@@ -12,6 +12,7 @@ impl Point {
         };
         point_copy
     }
+
     pub fn add(&self, other: &Point) -> Point {
         let point_copy = Point {
             x: self.x + other.x,
@@ -50,6 +51,11 @@ struct Vertex {
     coordinates: Point,
     grpahs: Vec<GraphRelation>,
 }
+impl Vertex {
+    fn is_equal(&self, other: &Point) -> bool {
+        self.coordinates.x == other.x && self.coordinates.y == other.y
+    }
+}
 
 pub struct Dijkstra {
     lines: Vec<Line>,
@@ -77,6 +83,7 @@ impl Dijkstra {
             cheapest_vertex_index: 0, // TODO is the same as start point index
         })
     }
+
     pub fn calculate_shortest_path(
         &mut self,
         starting_position: Point,
@@ -93,13 +100,37 @@ impl Dijkstra {
         self.create_vertex_matrix();
         result
     }
+
     fn create_vertex_matrix(&mut self) {
-        for _l in &self.lines {
-            self.append_to_vertex_matrix(&_l);
+        let lines_length: usize = self.lines.len();
+        for l_index in  0..lines_length { 
+            let line = self.lines[l_index].copy();
+            &mut self.append_to_vertex_matrix(line);
         }
     }
-    fn append_to_vertex_matrix(&self, line: &Line) {
-        
+
+    fn append_to_vertex_matrix(&mut self, line: Line) {
+        // ToDo: implement adding line to vertex matrixs
+        let start_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
+            .iter().position(|r| r.is_equal(&line.start));
+        let end_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
+            .iter().position(|r| r.is_equal(&line.finish));
+        let start_vertex_index: i32 = match start_vertex_index_option {
+            Some(v) => v as i32,
+            None => self.add_new_vertex(line.start.copy()),
+        };
+        let end_vertex_index_option: i32 = match end_vertex_index_option {
+            Some(v) => v as i32,
+            None => self.add_new_vertex(line.finish.copy()),
+        };
+    }
+
+    fn add_new_vertex(&mut self, coordinates: Point) -> i32 {
+        self.dijkstra_vertex_matrix.push(Vertex {
+            coordinates: coordinates,
+            grpahs: Vec::new(),
+        });
+        self.dijkstra_vertex_matrix.len() as i32
     }
 }
 
@@ -148,7 +179,7 @@ pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
         return false;
     }
     for line in lines {
-        if line.start.x == line.finish.x && line.start.y == line.finish.y {
+        if is_same_point(&line.start, &line.finish) {
             return false;
         }
     }

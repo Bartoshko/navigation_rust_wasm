@@ -52,7 +52,7 @@ pub fn navigate(
         x: targeted_position[0],
         y: targeted_position[1],
     };
-    let dijkstra: navigation_service::Dijkstra;
+    let mut dijkstra: navigation_service::Dijkstra;
     if new_dijkstra_result.is_err() {
         return vec![starting_position[0], starting_position[1]];
     }
