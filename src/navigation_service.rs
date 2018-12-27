@@ -87,10 +87,10 @@ impl Dijkstra {
             costs: HashMap::new(),
             parents: HashMap::new(),
             dijkstra_vertex_matrix: Vec::new(),
-            start_point_index: 0, //TODO from method to find index of start point and end point
-            end_point_index: 0,
+            start_point_index: -1,
+            end_point_index: -1,
             processed: Vec::new(),
-            cheapest_vertex_index: 0, // TODO is the same as start point index
+            cheapest_vertex_index: 0,
         })
     }
 
@@ -107,7 +107,22 @@ impl Dijkstra {
             });
             return result;
         }
+        // TODO check if starting position and final destination are valid nodes
+        // they should belong to path as one of the nodes else return result of zero length
+        // in future such error should to by handled and reported to developer
         self.create_vertex_matrix();
+        self.create_vetex_beggining_params(&starting_position, &final_destination);
+        self.search_for_shortest_path();
+        result
+    }
+
+    fn search_for_shortest_path(&mut self) {
+        while !self.processed.contains(&self.end_point_index) {
+            // process avaliable childes for cheapest vertex
+        }
+    }
+
+    fn create_vetex_beggining_params(&mut self, starting_position: &Point, final_destination: &Point) {
         self.start_point_index = self.get_index_from_vertex(&starting_position);
         self.end_point_index = self.get_index_from_vertex(&final_destination);
         self.costs.insert(self.start_point_index, 0);
@@ -115,7 +130,6 @@ impl Dijkstra {
         self.processed.push(self.start_point_index);
         self.parents.insert(self.end_point_index, -1);
         self.cheapest_vertex_index = self.start_point_index;
-        result
     }
 
     fn get_index_from_vertex(&self, point: &Point) -> i32 {
