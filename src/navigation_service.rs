@@ -116,8 +116,19 @@ impl Dijkstra {
         self.calculate_path_from_parents_schema(result)
     }
 
-    fn calculate_path_from_parents_schema(&self, result: Vec<Line>) -> Vec<Line> {
-        
+    fn calculate_path_from_parents_schema(&self, mut result: Vec<Line>) -> Vec<Line> {
+        let mut actual_index_from_parent: i32 = self.end_point_index;
+        let mut current_start_point: Point;
+        let mut current_end_point: Point = self.dijkstra_vertex_matrix[self.end_point_index as usize].coordinates.copy();
+        while actual_index_from_parent != self.end_point_index {
+            actual_index_from_parent = self.parents[&actual_index_from_parent];
+            current_start_point = self.dijkstra_vertex_matrix[actual_index_from_parent as usize].coordinates.copy();
+            result.push(Line {
+                start: current_end_point.copy(),
+                finish: current_end_point.copy()
+            });
+            current_end_point = current_start_point.copy();
+        }
         result
     }
 
