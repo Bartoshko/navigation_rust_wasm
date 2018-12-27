@@ -45,21 +45,21 @@ impl Line {
         line_copy
     }
 
-    pub fn length(&self) -> f32 {
-        let distance_x: f32 = (self.start.x - self.finish.x) as f32;
-        let distance_y: f32 = (self.start.y - self.finish.y) as f32;
+    pub fn length(&self) -> f64 {
+        let distance_x: f64 = (self.start.x - self.finish.x) as f64;
+        let distance_y: f64 = (self.start.y - self.finish.y) as f64;
         (distance_x.powi(2) + distance_y.powi(2)).sqrt()
     }
 }
 
 struct GraphRelation {
     vertex_index: i32,
-    cost: f32,
+    cost: f64,
 }
 
 struct Vertex {
     coordinates: Point,
-    grpahs: Vec<GraphRelation>,
+    graphs: Vec<GraphRelation>,
 }
 impl Vertex {
     fn is_equal(&self, other: &Point) -> bool {
@@ -69,7 +69,7 @@ impl Vertex {
 
 pub struct Dijkstra {
     lines: Vec<Line>,
-    costs: HashMap<i32, u32>,
+    costs: HashMap<i32, f64>,
     parents: HashMap<i32, i32>,
     dijkstra_vertex_matrix: Vec<Vertex>,
     start_point_index: i32,
@@ -113,44 +113,97 @@ impl Dijkstra {
         self.create_vertex_matrix();
         self.create_vetex_beggining_params(&starting_position, &final_destination);
         self.search_for_shortest_path();
+        self.calculate_path_from_parents_schema(result)
+    }
+
+    fn calculate_path_from_parents_schema(&self, result: Vec<Line>) -> Vec<Line> {
+        
         result
     }
 
     fn search_for_shortest_path(&mut self) {
+        let mut position_cost: f64 = 0.0;
+        let mut position_vertex_index: i32 = -1;
         while !self.processed.contains(&self.end_point_index) {
-            // process avaliable childes for cheapest vertex
+            if self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
+                .graphs
+                .iter()
+                .position(|p| {
+                    position_cost = p.cost;
+                    position_vertex_index = p.vertex_index;
+                    self.processed.contains(&p.vertex_index)
+                })
+                .is_none()
+            {
+                let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
+                let _child_cost: f64 = _parent_cost + position_cost;
+                if self.costs.contains_key(&position_vertex_index) {
+                    if self.costs[&position_vertex_index] > _child_cost {
+                        *self.costs.get_mut(&position_vertex_index).unwrap() = _child_cost;
+                        *self.parents.get_mut(&position_vertex_index).unwrap() = self.cheapest_vertex_index;
+                    }
+                } else {
+                    *self.costs.get_mut(&position_vertex_index).unwrap() =_child_cost;
+                    *self.parents.get_mut(&position_vertex_index).unwrap() = self.cheapest_vertex_index;
+                }
+            }
+            let mut min_cost = std::f64::MAX;
+            let mut min_value_index: i32 = - 1;
+            for (k, v) in &self.costs {
+                if self.processed.contains(k) {
+                    if min_cost > *v {
+                        min_cost = *v;
+                        min_value_index = *k;
+                    }
+                }
+            }
+            if min_value_index > -1 {
+                self.cheapest_vertex_index = min_value_index;
+                self.processed.push(self.cheapest_vertex_index);
+            }
         }
     }
 
-    fn create_vetex_beggining_params(&mut self, starting_position: &Point, final_destination: &Point) {
+    fn create_vetex_beggining_params(
+        &mut self,
+        starting_position: &Point,
+        final_destination: &Point,
+    ) {
         self.start_point_index = self.get_index_from_vertex(&starting_position);
         self.end_point_index = self.get_index_from_vertex(&final_destination);
-        self.costs.insert(self.start_point_index, 0);
-        self.costs.insert(self.end_point_index, u32::max_value());
+        self.costs.insert(self.start_point_index, 0.0);
+        self.costs.insert(self.end_point_index, std::f64::MAX);
         self.processed.push(self.start_point_index);
         self.parents.insert(self.end_point_index, -1);
         self.cheapest_vertex_index = self.start_point_index;
     }
 
     fn get_index_from_vertex(&self, point: &Point) -> i32 {
-        let found_i: i32 =  self.dijkstra_vertex_matrix
-            .iter().position(|v| v.coordinates.is_same(point)).unwrap() as i32;
+        let found_i: i32 = self
+            .dijkstra_vertex_matrix
+            .iter()
+            .position(|v| v.coordinates.is_same(point))
+            .unwrap() as i32;
         found_i
     }
 
     fn create_vertex_matrix(&mut self) {
         let lines_length: usize = self.lines.len();
-        for l_index in  0..lines_length { 
+        for l_index in 0..lines_length {
             let line = self.lines[l_index].copy();
             &mut self.append_to_vertex_matrix(line);
         }
     }
 
     fn append_to_vertex_matrix(&mut self, line: Line) {
-        let start_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
-            .iter().position(|r| r.is_equal(&line.start));
-        let end_vertex_index_option: Option<usize> = self.dijkstra_vertex_matrix
-            .iter().position(|r| r.is_equal(&line.finish));
+        let start_vertex_index_option: Option<usize> = self
+            .dijkstra_vertex_matrix
+            .iter()
+            .position(|r| r.is_equal(&line.start));
+        let end_vertex_index_option: Option<usize> = self
+            .dijkstra_vertex_matrix
+            .iter()
+            .position(|r| r.is_equal(&line.finish));
         let start_vertex_index: i32 = match start_vertex_index_option {
             Some(v) => v as i32,
             None => self.add_new_vertex(line.start.copy()),
@@ -159,7 +212,7 @@ impl Dijkstra {
             Some(v) => v as i32,
             None => self.add_new_vertex(line.finish.copy()),
         };
-        let cost: f32 = line.length();
+        let cost: f64 = line.length();
         &mut self.update_vertex_matrix(&start_vertex_index, &end_vertex_index, &cost);
         &mut self.update_vertex_matrix(&end_vertex_index, &start_vertex_index, &cost);
     }
@@ -167,24 +220,28 @@ impl Dijkstra {
     fn add_new_vertex(&mut self, coordinates: Point) -> i32 {
         self.dijkstra_vertex_matrix.push(Vertex {
             coordinates: coordinates,
-            grpahs: Vec::new(),
+            graphs: Vec::new(),
         });
         self.dijkstra_vertex_matrix.len() as i32
     }
 
-    fn update_vertex_matrix(&mut self, index_to_update: &i32, index_releted: &i32, cost: &f32) {
+    fn update_vertex_matrix(&mut self, index_to_update: &i32, index_releted: &i32, cost: &f64) {
         let i_update: i32 = *index_to_update;
         let i_related: i32 = *index_releted;
-        let loc_cost: f32 = *cost;
+        let loc_cost: f64 = *cost;
         if let Some(_) = self.dijkstra_vertex_matrix[i_update as usize]
-            .grpahs.iter().position(|rel| rel.vertex_index == i_related) {
+            .graphs
+            .iter()
+            .position(|rel| rel.vertex_index == i_related)
+        {
             return;
         } else {
             &self.dijkstra_vertex_matrix[i_update as usize]
-            .grpahs.push(GraphRelation {
-                vertex_index: i_related,
-                cost: loc_cost
-            });
+                .graphs
+                .push(GraphRelation {
+                    vertex_index: i_related,
+                    cost: loc_cost,
+                });
         }
     }
 }
