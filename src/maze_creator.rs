@@ -1,4 +1,4 @@
-// This module is testing correctness and speed of Dijkstra Algorithm.
+// This module is testing correctness and speed of Dijkstra Algorithm wrritten in Rust.
 use navigation_service;
 extern crate rand;
 use maze_creator::rand::{thread_rng, Rng};

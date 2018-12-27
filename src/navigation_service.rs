@@ -20,6 +20,10 @@ impl Point {
         };
         point_copy
     }
+
+    pub fn is_same(&self, other: &Point) -> bool {
+        self.x == other.x && self.y == other.y
+    }
 }
 
 pub struct Line {
@@ -65,7 +69,7 @@ impl Vertex {
 
 pub struct Dijkstra {
     lines: Vec<Line>,
-    costs: HashMap<i32, i32>,
+    costs: HashMap<i32, u32>,
     parents: HashMap<i32, i32>,
     dijkstra_vertex_matrix: Vec<Vertex>,
     start_point_index: i32,
@@ -96,7 +100,7 @@ impl Dijkstra {
         final_destination: Point,
     ) -> Vec<Line> {
         let mut result: Vec<Line> = Vec::new();
-        if is_same_point(&starting_position, &final_destination) {
+        if starting_position.is_same(&final_destination) {
             result.push(Line {
                 start: starting_position.copy(),
                 finish: starting_position.copy(),
@@ -104,10 +108,20 @@ impl Dijkstra {
             return result;
         }
         self.create_vertex_matrix();
-        // TODO: set start point i, end point i,
-        // beggining cost hashmap key, processed vector, parents hash map
-        // cheapest vertex index = start point index for beggining
+        self.start_point_index = self.get_index_from_vertex(&starting_position);
+        self.end_point_index = self.get_index_from_vertex(&final_destination);
+        self.costs.insert(self.start_point_index, 0);
+        self.costs.insert(self.end_point_index, u32::max_value());
+        self.processed.push(self.start_point_index);
+        self.parents.insert(self.end_point_index, -1);
+        self.cheapest_vertex_index = self.start_point_index;
         result
+    }
+
+    fn get_index_from_vertex(&self, point: &Point) -> i32 {
+        let found_i: i32 =  self.dijkstra_vertex_matrix
+            .iter().position(|v| v.coordinates.is_same(point)).unwrap() as i32;
+        found_i
     }
 
     fn create_vertex_matrix(&mut self) {
@@ -206,16 +220,9 @@ pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
         return false;
     }
     for line in lines {
-        if is_same_point(&line.start, &line.finish) {
+        if line.start.is_same(&line.finish) {
             return false;
         }
     }
     true
-}
-
-pub fn is_same_point(p_1: &Point, p_2: &Point) -> bool {
-    if p_1.x == p_2.x && p_1.y == p_2.y {
-        return true;
-    }
-    false
 }
