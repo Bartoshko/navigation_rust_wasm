@@ -146,31 +146,25 @@ impl Dijkstra {
     fn search_for_shortest_path(&mut self) {
         while !self.processed.contains(&self.end_point_index) {
             let iteration_max: i32 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
-                .graphs.len() as i32;
-            println!("iter_max {}", iteration_max);
+                .graphs
+                .len() as i32;
             for graph_index in 0..iteration_max {
-                println!("graph index: {}", graph_index);
-                if self.processed.contains(&graph_index) {
-                    println!("processed contains index {} ", graph_index);
-                    break;
-                }
-                let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
-                let _child_cost: f64 = _parent_cost + self.costs[&graph_index];
-                if self.costs.contains_key(&graph_index) {
-                    // println!("Inside {}", &position_vertex_index);
-                    if self.costs[&graph_index] > _child_cost {
-                        *self.costs.get_mut(&graph_index).unwrap() = _child_cost;
-                        *self.parents.get_mut(&graph_index).unwrap() =
-                            self.cheapest_vertex_index;
+                if !self.processed.contains(&graph_index) {
+                    let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
+                    let _graph_cost: f64 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize].graphs[graph_index as usize].cost;
+                    let _child_cost: f64 = _parent_cost + _graph_cost;
+                    if self.costs.contains_key(&graph_index) {
+                        if self.costs[&graph_index] > _child_cost {
+                            *self.costs.get_mut(&graph_index).unwrap() = _child_cost;
+                            *self.parents.get_mut(&graph_index).unwrap() =
+                                self.cheapest_vertex_index;
+                        }
+                    } else {
+                        self.costs.insert(graph_index, _child_cost);
+                        self.parents.insert(graph_index, self.cheapest_vertex_index);
                     }
-                } else {
-                    self.costs.insert(graph_index, _child_cost);
-                    self.parents.insert(graph_index, self.cheapest_vertex_index);
                 }
             }
-            println!("Parents num: {}", &self.parents.len());
-            println!("Processed num {}", &self.processed.len());
-            println!("Cost num {}", &self.costs.len());
             let mut min_cost = std::f64::MAX;
             let mut min_value_index: i32 = -1;
             for (k, v) in &self.costs {
@@ -182,11 +176,9 @@ impl Dijkstra {
                 }
             }
             if min_value_index > -1 {
-                println!("min value index {}", min_value_index);
                 self.cheapest_vertex_index = min_value_index;
                 self.processed.push(self.cheapest_vertex_index);
             }
-            println!("------------------------------------------------------------------------");
         }
     }
 
@@ -258,7 +250,8 @@ impl Dijkstra {
         if self.dijkstra_vertex_matrix[i_update as usize]
             .graphs
             .iter()
-            .position(|rel| rel.vertex_index == i_related).is_none()
+            .position(|rel| rel.vertex_index == i_related)
+            .is_none()
         {
             &mut self.dijkstra_vertex_matrix[i_update as usize]
                 .graphs
