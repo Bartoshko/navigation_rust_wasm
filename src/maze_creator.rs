@@ -103,4 +103,17 @@ mod test_maze {
         // test shortest path is borrowed as referance
         assert!(paths_1.len() == paths.len());
     }
+    #[test]
+    fn for_generated_path_check_navigation() {
+        let mut maze: super::LineMaze = super::LineMaze::new(5, 5);
+        maze.create();
+        let shortest_path: &Vec<super::navigation_service::Line> = &maze.shortest_path;
+        let paths: Vec<super::navigation_service::Line> = maze.lines;
+        println!("lines in path number is: {}", paths.len());
+        let new_dijkstra_result: Result<super::navigation_service::Dijkstra, &str> = super::navigation_service::Dijkstra::new(paths);
+        let mut navigation = new_dijkstra_result.unwrap();
+        let shortest_calculated = navigation.calculate_shortest_path(shortest_path[0].start.copy(), shortest_path[shortest_path.len() -1].finish.copy());
+        // assert_eq!(shortest_path.len(), shortest_calculated.len());
+        println!("shortest from maze lenght is: {}, shortest from navigation calculation is: {}", shortest_path.len(), shortest_calculated.len());
+    }
 }

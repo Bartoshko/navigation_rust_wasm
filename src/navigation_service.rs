@@ -113,19 +113,25 @@ impl Dijkstra {
         self.create_vertex_matrix();
         self.create_vetex_beggining_params(&starting_position, &final_destination);
         self.search_for_shortest_path();
-        self.calculate_path_from_parents_schema(result)
+        result
+        // self.calculate_path_from_parents_schema(result)
     }
 
     fn calculate_path_from_parents_schema(&self, mut result: Vec<Line>) -> Vec<Line> {
         let mut actual_index_from_parent: i32 = self.end_point_index;
         let mut current_start_point: Point;
-        let mut current_end_point: Point = self.dijkstra_vertex_matrix[self.end_point_index as usize].coordinates.copy();
+        let mut current_end_point: Point = self.dijkstra_vertex_matrix
+            [self.end_point_index as usize]
+            .coordinates
+            .copy();
         while actual_index_from_parent != self.end_point_index {
             actual_index_from_parent = self.parents[&actual_index_from_parent];
-            current_start_point = self.dijkstra_vertex_matrix[actual_index_from_parent as usize].coordinates.copy();
+            current_start_point = self.dijkstra_vertex_matrix[actual_index_from_parent as usize]
+                .coordinates
+                .copy();
             result.push(Line {
                 start: current_end_point.copy(),
-                finish: current_end_point.copy()
+                finish: current_end_point.copy(),
             });
             current_end_point = current_start_point.copy();
         }
@@ -151,15 +157,17 @@ impl Dijkstra {
                 if self.costs.contains_key(&position_vertex_index) {
                     if self.costs[&position_vertex_index] > _child_cost {
                         *self.costs.get_mut(&position_vertex_index).unwrap() = _child_cost;
-                        *self.parents.get_mut(&position_vertex_index).unwrap() = self.cheapest_vertex_index;
+                        *self.parents.get_mut(&position_vertex_index).unwrap() =
+                            self.cheapest_vertex_index;
                     }
                 } else {
-                    *self.costs.get_mut(&position_vertex_index).unwrap() =_child_cost;
-                    *self.parents.get_mut(&position_vertex_index).unwrap() = self.cheapest_vertex_index;
+                    self.costs.insert(position_vertex_index, _child_cost);
+                    self.parents.insert(position_vertex_index, self.cheapest_vertex_index);
                 }
             }
+            println!("Parents num: {}", &self.parents.len());
             let mut min_cost = std::f64::MAX;
-            let mut min_value_index: i32 = - 1;
+            let mut min_value_index: i32 = -1;
             for (k, v) in &self.costs {
                 if self.processed.contains(k) {
                     if min_cost > *v {
@@ -240,14 +248,13 @@ impl Dijkstra {
         let i_update: i32 = *index_to_update;
         let i_related: i32 = *index_releted;
         let loc_cost: f64 = *cost;
-        if let Some(_) = self.dijkstra_vertex_matrix[i_update as usize]
+        let is_between = super::navigation_service::i32_in_range(&0, &(self.dijkstra_vertex_matrix.len() - 1), &(i_update as usize));
+        if is_between && self.dijkstra_vertex_matrix[i_update as usize]
             .graphs
             .iter()
-            .position(|rel| rel.vertex_index == i_related)
+            .position(|rel| rel.vertex_index == i_related).is_none()
         {
-            return;
-        } else {
-            &self.dijkstra_vertex_matrix[i_update as usize]
+            &mut self.dijkstra_vertex_matrix[i_update as usize]
                 .graphs
                 .push(GraphRelation {
                     vertex_index: i_related,
@@ -301,10 +308,14 @@ pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
     if lines.len() == 0 {
         return false;
     }
-    for line in lines {
-        if line.start.is_same(&line.finish) {
-            return false;
-        }
-    }
+    // for line in lines {
+    //     if line.start.is_same(&line.finish) {
+    //         return false;
+    //     }
+    // }
     true
+}
+
+pub fn i32_in_range(start: &usize, stop: &usize, check: &usize) -> bool {
+    check >= stop && check <= stop
 }
