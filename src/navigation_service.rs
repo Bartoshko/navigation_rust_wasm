@@ -115,11 +115,11 @@ impl Dijkstra {
         // TODO check if starting position and final destination are valid nodes
         // they should belong to path as one of the nodes else return result of zero length
         // in future such error should to by handled and reported to developer
+        println!("start {:?}, stop{:?}", starting_position, final_destination);
         self.create_vertex_matrix();
         self.create_vertex_beginning_params(&starting_position, &final_destination);
         self.search_for_shortest_path();
         self.calculate_path_from_parents_schema(result)
-        // result
     }
 
     fn calculate_path_from_parents_schema(&self, mut result: Vec<Line>) -> Vec<Line> {
@@ -129,7 +129,7 @@ impl Dijkstra {
             [self.end_point_index as usize]
             .coordinates
             .copy();
-        while actual_index_from_parent != self.end_point_index {
+        while actual_index_from_parent != self.start_point_index {
             actual_index_from_parent = self.parents[&actual_index_from_parent];
             current_start_point = self.dijkstra_vertex_matrix[actual_index_from_parent as usize]
                 .coordinates
@@ -139,7 +139,14 @@ impl Dijkstra {
                 finish: current_end_point.copy(),
             });
             current_end_point = current_start_point.copy();
+            println!("{:?}", current_end_point);
         }
+        // for debug purpose only 
+        for elem in &self.parents {
+            println!("elem: {:?}", elem);
+        }
+        println!("{:?}", result);
+        // debug 
         result
     }
 
