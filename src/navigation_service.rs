@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -26,6 +27,7 @@ impl Point {
     }
 }
 
+#[derive(Debug)]
 pub struct Line {
     pub start: Point,
     pub finish: Point,
@@ -52,11 +54,13 @@ impl Line {
     }
 }
 
+#[derive(Debug)]
 struct GraphRelation {
     vertex_index: i32,
     cost: f64,
 }
 
+#[derive(Debug)]
 struct Vertex {
     coordinates: Point,
     graphs: Vec<GraphRelation>,
@@ -67,6 +71,7 @@ impl Vertex {
     }
 }
 
+#[derive(Debug)]
 pub struct Dijkstra {
     lines: Vec<Line>,
     costs: HashMap<i32, f64>,
@@ -90,7 +95,7 @@ impl Dijkstra {
             start_point_index: -1,
             end_point_index: -1,
             processed: Vec::new(),
-            cheapest_vertex_index: 0,
+            cheapest_vertex_index: -1,
         })
     }
 
@@ -111,10 +116,10 @@ impl Dijkstra {
         // they should belong to path as one of the nodes else return result of zero length
         // in future such error should to by handled and reported to developer
         self.create_vertex_matrix();
-        self.create_vetex_beggining_params(&starting_position, &final_destination);
-        self.search_for_shortest_path();
-        result
+        // self.create_vertex_beginning_params(&starting_position, &final_destination);
+        // self.search_for_shortest_path();
         // self.calculate_path_from_parents_schema(result)
+        result
     }
 
     fn calculate_path_from_parents_schema(&self, mut result: Vec<Line>) -> Vec<Line> {
@@ -139,37 +144,40 @@ impl Dijkstra {
     }
 
     fn search_for_shortest_path(&mut self) {
-        let mut position_cost: f64 = 0.0;
-        let mut position_vertex_index: i32 = -1;
         while !self.processed.contains(&self.end_point_index) {
-            if self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
-                .graphs
-                .iter()
-                .position(|p| {
-                    position_cost = p.cost;
-                    position_vertex_index = p.vertex_index;
-                    self.processed.contains(&p.vertex_index)
-                })
-                .is_none()
-            {
+            let iteration_max: i32 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
+                .graphs.len() as i32;
+            for i in &self.dijkstra_vertex_matrix[0]
+                .graphs {
+                    println!("{}, {}", i.vertex_index, i.cost);
+                }
+            // println!("iter_max {}", iteration_max);
+            for graph_index in 0..iteration_max {
+                // println!("graph index: {}", graph_index);
+                if self.processed.contains(&graph_index) {
+                    return;
+                }
                 let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
-                let _child_cost: f64 = _parent_cost + position_cost;
-                if self.costs.contains_key(&position_vertex_index) {
-                    if self.costs[&position_vertex_index] > _child_cost {
-                        *self.costs.get_mut(&position_vertex_index).unwrap() = _child_cost;
-                        *self.parents.get_mut(&position_vertex_index).unwrap() =
+                let _child_cost: f64 = _parent_cost + self.costs[&graph_index];
+                if self.costs.contains_key(&graph_index) {
+                    // println!("Inside {}", &position_vertex_index);
+                    if self.costs[&graph_index] > _child_cost {
+                        *self.costs.get_mut(&graph_index).unwrap() = _child_cost;
+                        *self.parents.get_mut(&graph_index).unwrap() =
                             self.cheapest_vertex_index;
                     }
                 } else {
-                    self.costs.insert(position_vertex_index, _child_cost);
-                    self.parents.insert(position_vertex_index, self.cheapest_vertex_index);
+                    self.costs.insert(graph_index, _child_cost);
+                    self.parents.insert(graph_index, self.cheapest_vertex_index);
                 }
             }
-            println!("Parents num: {}", &self.parents.len());
+            // println!("Parents num: {}", &self.parents.len());
+            // println!("Processed num {}", &self.processed.len());
+            // println!("Cost num {}", &self.costs.len());
             let mut min_cost = std::f64::MAX;
             let mut min_value_index: i32 = -1;
             for (k, v) in &self.costs {
-                if self.processed.contains(k) {
+                if !self.processed.contains(k) {
                     if min_cost > *v {
                         min_cost = *v;
                         min_value_index = *k;
@@ -177,13 +185,15 @@ impl Dijkstra {
                 }
             }
             if min_value_index > -1 {
+                println!("min value index {}", min_value_index);
                 self.cheapest_vertex_index = min_value_index;
                 self.processed.push(self.cheapest_vertex_index);
             }
+            // println!("------------------------------------------------------------------------");
         }
     }
 
-    fn create_vetex_beggining_params(
+    fn create_vertex_beginning_params(
         &mut self,
         starting_position: &Point,
         final_destination: &Point,
@@ -234,6 +244,7 @@ impl Dijkstra {
         let cost: f64 = line.length();
         &mut self.update_vertex_matrix(&start_vertex_index, &end_vertex_index, &cost);
         &mut self.update_vertex_matrix(&end_vertex_index, &start_vertex_index, &cost);
+        println!("{}", self.dijkstra_vertex_matrix.len());
     }
 
     fn add_new_vertex(&mut self, coordinates: Point) -> i32 {
@@ -241,15 +252,14 @@ impl Dijkstra {
             coordinates: coordinates,
             graphs: Vec::new(),
         });
-        self.dijkstra_vertex_matrix.len() as i32
+        (self.dijkstra_vertex_matrix.len() - 1) as i32
     }
 
-    fn update_vertex_matrix(&mut self, index_to_update: &i32, index_releted: &i32, cost: &f64) {
+    fn update_vertex_matrix(&mut self, index_to_update: &i32, index_related: &i32, cost: &f64) {
         let i_update: i32 = *index_to_update;
-        let i_related: i32 = *index_releted;
+        let i_related: i32 = *index_related;
         let loc_cost: f64 = *cost;
-        let is_between = super::navigation_service::i32_in_range(&0, &(self.dijkstra_vertex_matrix.len() - 1), &(i_update as usize));
-        if is_between && self.dijkstra_vertex_matrix[i_update as usize]
+        if self.dijkstra_vertex_matrix[i_update as usize]
             .graphs
             .iter()
             .position(|rel| rel.vertex_index == i_related).is_none()
@@ -314,8 +324,4 @@ pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
     //     }
     // }
     true
-}
-
-pub fn i32_in_range(start: &usize, stop: &usize, check: &usize) -> bool {
-    check >= stop && check <= stop
 }
