@@ -116,10 +116,10 @@ impl Dijkstra {
         // they should belong to path as one of the nodes else return result of zero length
         // in future such error should to by handled and reported to developer
         self.create_vertex_matrix();
-        // self.create_vertex_beginning_params(&starting_position, &final_destination);
-        // self.search_for_shortest_path();
-        // self.calculate_path_from_parents_schema(result)
-        result
+        self.create_vertex_beginning_params(&starting_position, &final_destination);
+        self.search_for_shortest_path();
+        self.calculate_path_from_parents_schema(result)
+        // result
     }
 
     fn calculate_path_from_parents_schema(&self, mut result: Vec<Line>) -> Vec<Line> {
@@ -147,15 +147,12 @@ impl Dijkstra {
         while !self.processed.contains(&self.end_point_index) {
             let iteration_max: i32 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
                 .graphs.len() as i32;
-            for i in &self.dijkstra_vertex_matrix[0]
-                .graphs {
-                    println!("{}, {}", i.vertex_index, i.cost);
-                }
-            // println!("iter_max {}", iteration_max);
+            println!("iter_max {}", iteration_max);
             for graph_index in 0..iteration_max {
-                // println!("graph index: {}", graph_index);
+                println!("graph index: {}", graph_index);
                 if self.processed.contains(&graph_index) {
-                    return;
+                    println!("processed contains index {} ", graph_index);
+                    break;
                 }
                 let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
                 let _child_cost: f64 = _parent_cost + self.costs[&graph_index];
@@ -171,9 +168,9 @@ impl Dijkstra {
                     self.parents.insert(graph_index, self.cheapest_vertex_index);
                 }
             }
-            // println!("Parents num: {}", &self.parents.len());
-            // println!("Processed num {}", &self.processed.len());
-            // println!("Cost num {}", &self.costs.len());
+            println!("Parents num: {}", &self.parents.len());
+            println!("Processed num {}", &self.processed.len());
+            println!("Cost num {}", &self.costs.len());
             let mut min_cost = std::f64::MAX;
             let mut min_value_index: i32 = -1;
             for (k, v) in &self.costs {
@@ -189,7 +186,7 @@ impl Dijkstra {
                 self.cheapest_vertex_index = min_value_index;
                 self.processed.push(self.cheapest_vertex_index);
             }
-            // println!("------------------------------------------------------------------------");
+            println!("------------------------------------------------------------------------");
         }
     }
 
@@ -244,7 +241,6 @@ impl Dijkstra {
         let cost: f64 = line.length();
         &mut self.update_vertex_matrix(&start_vertex_index, &end_vertex_index, &cost);
         &mut self.update_vertex_matrix(&end_vertex_index, &start_vertex_index, &cost);
-        println!("{}", self.dijkstra_vertex_matrix.len());
     }
 
     fn add_new_vertex(&mut self, coordinates: Point) -> i32 {
