@@ -105,15 +105,30 @@ mod test_maze {
     }
     #[test]
     fn for_generated_path_check_navigation() {
-        let mut maze: super::LineMaze = super::LineMaze::new(5, 5);
-        maze.create();
-        let shortest_path: &Vec<super::navigation_service::Line> = &maze.shortest_path;
-        let paths: Vec<super::navigation_service::Line> = maze.lines;
-        println!("lines in path number is: {}", paths.len());
-        let new_dijkstra_result: Result<super::navigation_service::Dijkstra, &str> = super::navigation_service::Dijkstra::new(paths);
+        use navigation_service::Line;
+        use navigation_service::Point;
+        let test_maze: Vec<Line> = vec!(
+            Line {start: Point {x: 0, y: 0}, finish: Point {x: 5, y: 5}},
+            Line {start: Point {x: 5, y: 5}, finish: Point {x: 10, y: 10}},
+            Line {start: Point {x: 10, y: 10}, finish: Point {x: 15, y: 15}},
+            Line {start: Point {x: 15, y: 15}, finish: Point {x: 20, y: 20}},
+            Line {start: Point {x: 0, y: 0}, finish: Point {x: 120, y: 120}},
+            Line {start: Point {x: 120, y: 120}, finish: Point {x: 20, y: 20}},
+            Line {start: Point {x: 0, y: 0}, finish: Point {x: 0, y: 120}},
+            Line {start: Point {x: 0, y: 120}, finish: Point {x: 120, y: 120}},
+            Line {start: Point {x: 0, y: 0}, finish: Point {x: 80, y: 120}},
+            Line {start: Point {x: 80, y: 120}, finish: Point {x: 20, y: 20}},
+        );
+        // let mut maze: super::LineMaze = super::LineMaze::new(5, 5);
+        // maze.create();
+        // let shortest_path: &Vec<super::navigation_service::Line> = &maze.shortest_path;
+        // let paths: Vec<super::navigation_service::Line> = maze.lines;
+        // println!("lines in path number is: {}", paths.len());
+        let s = test_maze[0].start.copy();
+        let f = test_maze[3].finish.copy();
+        let new_dijkstra_result: Result<super::navigation_service::Dijkstra, &str> = super::navigation_service::Dijkstra::new(test_maze);
         let mut navigation = new_dijkstra_result.unwrap();
-        let shortest_calculated = navigation.calculate_shortest_path(shortest_path[0].start.copy(), shortest_path[shortest_path.len() -1].finish.copy());
+        let shortest_calculated = navigation.calculate_shortest_path(s, f);
         // assert_eq!(shortest_path.len(), shortest_calculated.len());
-        println!("shortest from maze lenght is: {}, shortest from navigation calculation is: {}", shortest_path.len(), shortest_calculated.len());
     }
 }

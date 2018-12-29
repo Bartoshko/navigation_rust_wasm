@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-#[derive(Debug)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -27,7 +26,6 @@ impl Point {
     }
 }
 
-#[derive(Debug)]
 pub struct Line {
     pub start: Point,
     pub finish: Point,
@@ -54,13 +52,11 @@ impl Line {
     }
 }
 
-#[derive(Debug)]
 struct GraphRelation {
     vertex_index: i32,
     cost: f64,
 }
 
-#[derive(Debug)]
 struct Vertex {
     coordinates: Point,
     graphs: Vec<GraphRelation>,
@@ -71,7 +67,6 @@ impl Vertex {
     }
 }
 
-#[derive(Debug)]
 pub struct Dijkstra {
     lines: Vec<Line>,
     costs: HashMap<i32, f64>,
@@ -115,7 +110,6 @@ impl Dijkstra {
         // TODO check if starting position and final destination are valid nodes
         // they should belong to path as one of the nodes else return result of zero length
         // in future such error should to by handled and reported to developer
-        println!("start {:?}, stop{:?}", starting_position, final_destination);
         self.create_vertex_matrix();
         self.create_vertex_beginning_params(&starting_position, &final_destination);
         self.search_for_shortest_path();
@@ -135,40 +129,36 @@ impl Dijkstra {
                 .coordinates
                 .copy();
             result.push(Line {
-                start: current_end_point.copy(),
+                start: current_start_point.copy(),
                 finish: current_end_point.copy(),
             });
             current_end_point = current_start_point.copy();
-            println!("{:?}", current_end_point);
         }
-        // for debug purpose only 
-        for elem in &self.parents {
-            println!("elem: {:?}", elem);
-        }
-        println!("{:?}", result);
-        // debug 
+        result.reverse();
         result
     }
 
     fn search_for_shortest_path(&mut self) {
         while !self.processed.contains(&self.end_point_index) {
+            let mut vertex_index: i32;
             let iteration_max: i32 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize]
                 .graphs
                 .len() as i32;
             for graph_index in 0..iteration_max {
-                if !self.processed.contains(&graph_index) {
+                vertex_index = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize].graphs[graph_index as usize].vertex_index;
+                if !self.processed.contains(&vertex_index) {
                     let _parent_cost: f64 = self.costs[&self.cheapest_vertex_index];
                     let _graph_cost: f64 = self.dijkstra_vertex_matrix[self.cheapest_vertex_index as usize].graphs[graph_index as usize].cost;
                     let _child_cost: f64 = _parent_cost + _graph_cost;
-                    if self.costs.contains_key(&graph_index) {
-                        if self.costs[&graph_index] > _child_cost {
-                            *self.costs.get_mut(&graph_index).unwrap() = _child_cost;
-                            *self.parents.get_mut(&graph_index).unwrap() =
+                    if self.costs.contains_key(&vertex_index) {
+                        if self.costs[&vertex_index] > _child_cost {
+                            *self.costs.get_mut(&vertex_index).unwrap() = _child_cost;
+                            *self.parents.get_mut(&vertex_index).unwrap() =
                                 self.cheapest_vertex_index;
                         }
                     } else {
-                        self.costs.insert(graph_index, _child_cost);
-                        self.parents.insert(graph_index, self.cheapest_vertex_index);
+                        self.costs.insert(vertex_index, _child_cost);
+                        self.parents.insert(vertex_index, self.cheapest_vertex_index);
                     }
                 }
             }
@@ -314,10 +304,10 @@ pub fn is_correct_line_set(lines: &Vec<Line>) -> bool {
     if lines.len() == 0 {
         return false;
     }
-    // for line in lines {
-    //     if line.start.is_same(&line.finish) {
-    //         return false;
-    //     }
-    // }
+    for line in lines {
+        if line.start.is_same(&line.finish) {
+            return false;
+        }
+    }
     true
 }
