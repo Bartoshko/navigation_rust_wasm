@@ -2,6 +2,7 @@
 use navigation_service;
 extern crate rand;
 use maze_creator::rand::{thread_rng, Rng};
+use std::time::SystemTime;
 
 pub struct LineMaze {
     lines_num: u32,
@@ -100,48 +101,85 @@ mod test_maze {
         assert_eq!(shortest_path.len(), 100);
         // test all paths are having greater num than shortest path num
         assert!(paths.len() / (200 - 1) > shortest_path.len());
-        // test shortest path is borrowed as referance
+        // test shortest path is borrowed as reference
         assert!(paths_1.len() == paths.len());
     }
     #[test]
     fn for_basic_path_check_navigation() {
         // test scenario basic
         println!("Basic scenario test ...");
+        use navigation_service::calculate_vertex_matrix;
+        use navigation_service::Dijkstra;
         use navigation_service::Line;
         use navigation_service::Point;
-        let test_maze: Vec<Line> = vec!(
-            Line {start: Point {x: 0, y: 0}, finish: Point {x: 5, y: 5}},
-            Line {start: Point {x: 5, y: 5}, finish: Point {x: 10, y: 10}},
-            Line {start: Point {x: 10, y: 10}, finish: Point {x: 15, y: 15}},
-            Line {start: Point {x: 15, y: 15}, finish: Point {x: 20, y: 20}},
-            Line {start: Point {x: 0, y: 0}, finish: Point {x: 120, y: 120}},
-            Line {start: Point {x: 120, y: 120}, finish: Point {x: 20, y: 20}},
-            Line {start: Point {x: 0, y: 0}, finish: Point {x: 0, y: 120}},
-            Line {start: Point {x: 0, y: 120}, finish: Point {x: 120, y: 120}},
-            Line {start: Point {x: 0, y: 0}, finish: Point {x: 80, y: 120}},
-            Line {start: Point {x: 80, y: 120}, finish: Point {x: 20, y: 20}},
-        );
-        
-        let s = test_maze[0].start.copy();
-        let f = test_maze[3].finish.copy();
-        let new_dijkstra_result: Result<super::navigation_service::Dijkstra, &str> = super::navigation_service::Dijkstra::new(test_maze);
-        let mut navigation = new_dijkstra_result.unwrap();
-        let shortest_basic = navigation.calculate_shortest_path(s, f);
-        println!("Shortest path from basic test is {} lines long", shortest_basic.len());
-        assert_eq!(4, shortest_basic.len());
-        println!("--------------------------------------------------------------");
+        use navigation_service::Vertex;
+
+        let test_maze: Vec<Line> = vec![
+            Line {
+                start: Point { x: 0, y: 0 },
+                finish: Point { x: 5, y: 5 },
+            },
+            Line {
+                start: Point { x: 5, y: 5 },
+                finish: Point { x: 10, y: 10 },
+            },
+            Line {
+                start: Point { x: 10, y: 10 },
+                finish: Point { x: 15, y: 15 },
+            },
+            Line {
+                start: Point { x: 15, y: 15 },
+                finish: Point { x: 20, y: 20 },
+            },
+            Line {
+                start: Point { x: 0, y: 0 },
+                finish: Point { x: 120, y: 120 },
+            },
+            Line {
+                start: Point { x: 120, y: 120 },
+                finish: Point { x: 20, y: 20 },
+            },
+            Line {
+                start: Point { x: 0, y: 0 },
+                finish: Point { x: 0, y: 120 },
+            },
+            Line {
+                start: Point { x: 0, y: 120 },
+                finish: Point { x: 120, y: 120 },
+            },
+            Line {
+                start: Point { x: 0, y: 0 },
+                finish: Point { x: 80, y: 120 },
+            },
+            Line {
+                start: Point { x: 80, y: 120 },
+                finish: Point { x: 20, y: 20 },
+            },
+        ];
+        let vertex: Vec<Vertex> = calculate_vertex_matrix(&test_maze);
+        if vertex.len() > 0 {
+            let mut dijkstra = Dijkstra::new(vertex);
+            let s = test_maze[0].start.copy();
+            let f = test_maze[3].finish.copy();
+            let shortest_basic = dijkstra.calculate_shortest_path(&s, &f);
+            println!(
+                "Shortest path from basic test is {} lines long",
+                shortest_basic.len()
+            );
+            assert_eq!(4, shortest_basic.len());
+            println!("--------------------------------------------------------------");
+        } else {
+            panic!("Vertex has zero length");
+        }
     }
 
     #[test]
     fn for_complicated_path_check_navigation() {
-        // Note that if path is too long and num of branches is too big
-        // then possibility of generating line of zero length increases.
-        // It is not fixed as maze_creator purpose is only as testing module, but You can fix it.
-        // If such thing happen than navigation_service::Dijkstra::new() is going to return Err
-        // and compiler will panic. 
-        // This is not the case to handle error in this test,
-        // so be aware of this and use 'RUST_BACKTRACE=1' to track this error.
-
+        use navigation_service::calculate_vertex_matrix;
+        use navigation_service::Dijkstra;
+        use navigation_service::Line;
+        use navigation_service::Point;
+        use navigation_service::Vertex;
         // complicated scenario test
         println!("Complicated scenario test ...");
         // GIVEN
@@ -150,20 +188,35 @@ mod test_maze {
         let num_branches_in_maze = 10;
         // WHEN
         // test logic:
-        let mut maze: super::LineMaze = super::LineMaze::new(num_lines_in_shortest_path, num_branches_in_maze);
+        let mut maze: super::LineMaze =
+            super::LineMaze::new(num_lines_in_shortest_path, num_branches_in_maze);
         maze.create();
-        let shortest_maze: &Vec<super::navigation_service::Line> = &maze.shortest_path;
+        let shortest_maze: &Vec<Line> = &maze.shortest_path;
         let s = shortest_maze[0].start.copy();
-        let f = shortest_maze[shortest_maze.len() -1].finish.copy();
-        let testing_maze: Vec<super::navigation_service::Line> = maze.lines;
-        println!("All lines in path number is: {}", testing_maze.len());
-        let new_dijkstra_result: Result<super::navigation_service::Dijkstra, &str> = super::navigation_service::Dijkstra::new(testing_maze);
-        let mut navigation = new_dijkstra_result.unwrap();
-        let shortest_calculated = navigation.calculate_shortest_path(s, f);
+        let f = shortest_maze[shortest_maze.len() - 1].finish.copy();
+        println!("All lines in path number is: {}", maze.lines.len());
+        let vertex = calculate_vertex_matrix(&maze.lines);
+        let mut dijkstra = Dijkstra::new(vertex);
+        let mut shortest_calculated: Vec<Line>;
         // THEN
         // assertion:
-        assert_eq!(shortest_maze.len(), shortest_calculated.len());
-        println!("shortest path build for test is: {}, navigation calculation has value: {}",shortest_maze.len(), shortest_calculated.len());
+        let start_timer = super::SystemTime::now()
+            .duration_since(super::SystemTime::UNIX_EPOCH)
+            .unwrap();
+        for _ in 0..100 {
+            shortest_calculated = dijkstra.calculate_shortest_path(&s, &f);
+            // assert_eq!(shortest_maze.len(), shortest_calculated.len());
+            println!(
+                "shortest path build for test is: {}, navigation calculation has value: {}",
+                shortest_maze.len(),
+                shortest_calculated.len()
+            );
+        }
+        let stop_timer = super::SystemTime::now()
+            .duration_since(super::SystemTime::UNIX_EPOCH)
+            .unwrap();
+        let passed = stop_timer - start_timer;
+        println!("Time to calculate 100 paths is {:?}", passed);
         println!("--------------------------------------------------------------");
     }
 }

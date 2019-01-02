@@ -32,32 +32,32 @@ pub fn create_maze(path_lines_num: u32, branches_num: u32) -> Vec<i32> {
     mock_empty_vec
 }
 
-#[wasm_bindgen()]
-pub fn navigate(
-    given_maze: Vec<i32>,
-    starting_position: Vec<i32>,
-    targeted_position: Vec<i32>,
-) -> Vec<i32> {
-    if navigation_service::is_correct_length(&given_maze) {
-        return vec![starting_position[0], starting_position[1]];
-    }
-    let maze_lines: Vec<navigation_service::Line> = navigation_service::vector_to_path(given_maze);
-    let new_dijkstra_result: Result<navigation_service::Dijkstra, &str> =
-        navigation_service::Dijkstra::new(maze_lines);
-    let point_to_start_from = navigation_service::Point {
-        x: starting_position[0],
-        y: starting_position[1],
-    };
-    let point_to_calc_path_to = navigation_service::Point {
-        x: targeted_position[0],
-        y: targeted_position[1],
-    };
-    let mut dijkstra: navigation_service::Dijkstra;
-    if new_dijkstra_result.is_err() {
-        return vec![starting_position[0], starting_position[1]];
-    }
-    dijkstra = new_dijkstra_result.unwrap();
-    navigation_service::path_to_vector(
-        &dijkstra.calculate_shortest_path(point_to_start_from, point_to_calc_path_to),
-    )
-}
+// #[wasm_bindgen()]
+// pub fn navigate(
+//     given_maze: Vec<i32>,
+//     starting_position: Vec<i32>,
+//     targeted_position: Vec<i32>,
+// ) -> Vec<i32> {
+    // if navigation_service::is_correct_length(&given_maze) {
+    //     return vec![starting_position[0], starting_position[1]];
+    // }
+    // let maze_lines: Vec<navigation_service::Line> = navigation_service::vector_to_path(given_maze);
+    // let new_dijkstra_result: Result<navigation_service::Dijkstra, &str> =
+    //     navigation_service::Dijkstra::new(maze_lines);
+    // let point_to_start_from = navigation_service::Point {
+    //     x: starting_position[0],
+    //     y: starting_position[1],
+    // };
+    // let point_to_calc_path_to = navigation_service::Point {
+    //     x: targeted_position[0],
+    //     y: targeted_position[1],
+    // };
+    // let mut dijkstra: navigation_service::Dijkstra;
+    // if new_dijkstra_result.is_err() {
+    //     return vec![starting_position[0], starting_position[1]];
+    // }
+    // dijkstra = new_dijkstra_result.unwrap();
+    // navigation_service::path_to_vector(
+    //     &dijkstra.calculate_shortest_path(point_to_start_from, point_to_calc_path_to),
+    // )
+// }
