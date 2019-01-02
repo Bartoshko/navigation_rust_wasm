@@ -203,12 +203,14 @@ mod test_maze {
         let start_timer = super::SystemTime::now()
             .duration_since(super::SystemTime::UNIX_EPOCH)
             .unwrap();
-        for _ in 0..100 {
+        let mut counter = 0;
+        while counter < 100 {
+            counter += 1;
             shortest_calculated = dijkstra.calculate_shortest_path(&s, &f);
-            // assert_eq!(shortest_maze.len(), shortest_calculated.len());
+            assert_eq!(shortest_maze.len(), shortest_calculated.len());
             println!(
-                "shortest path build for test is: {}, navigation calculation has value: {}",
-                shortest_maze.len(),
+                "shortest path calculation sequence {} for test is: navigation calculation has value: {}",
+                counter,
                 shortest_calculated.len()
             );
         }
@@ -216,7 +218,7 @@ mod test_maze {
             .duration_since(super::SystemTime::UNIX_EPOCH)
             .unwrap();
         let passed = stop_timer - start_timer;
-        println!("Time to calculate 100 paths is {:?}", passed);
+        println!("Time to calculate {} paths is {:?}", counter, passed);
         println!("--------------------------------------------------------------");
     }
 }

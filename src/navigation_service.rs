@@ -24,6 +24,14 @@ impl Point {
     pub fn is_same(&self, other: &Point) -> bool {
         self.x == other.x && self.y == other.y
     }
+
+    pub fn distance(&self, other: &Point) -> f64 {
+        let line = Line {
+            start: self.copy(),
+            finish: other.copy(),
+        };
+        line.length()
+    }
 }
 
 pub struct Line {
@@ -184,8 +192,8 @@ impl Dijkstra {
         starting_position: &Point,
         final_destination: &Point,
     ) {
-        self.start_point_index = self.get_index_from_vertex(&starting_position);
-        self.end_point_index = self.get_index_from_vertex(&final_destination);
+        self.start_point_index = self.grab_closest_on_vertex(&starting_position);
+        self.end_point_index = self.grab_closest_on_vertex(&final_destination);
         self.costs.insert(self.start_point_index, 0.0);
         self.costs.insert(self.end_point_index, std::f64::MAX);
         self.processed.push(self.start_point_index);
@@ -193,12 +201,20 @@ impl Dijkstra {
         self.cheapest_vertex_index = self.start_point_index;
     }
 
-    fn get_index_from_vertex(&self, point: &Point) -> i32 {
-        let found_i: i32 = self
-            .dijkstra_vertex_matrix
-            .iter()
-            .position(|v| v.coordinates.is_same(point))
-            .unwrap() as i32;
+    fn grab_closest_on_vertex(&self, coordinates: &Point) -> i32 {
+        let mut closest: Point = self.dijkstra_vertex_matrix[0].coordinates.copy();
+        let mut distance = coordinates.distance(&closest);
+        let mut found_i: i32 = 0;
+        let mut index = 0;
+        self.dijkstra_vertex_matrix.iter().for_each(|v| {
+            let calculated_distance = v.coordinates.distance(&coordinates);
+            if calculated_distance < distance {
+                distance = calculated_distance;
+                closest = v.coordinates.copy();
+                found_i = index;
+            }
+            index += 1;
+        });
         found_i
     }
 
